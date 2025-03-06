@@ -1,16 +1,18 @@
 import { prisma } from '../helpers/dbController.js';
-
+import { randomUUID } from 'crypto';
 export type Message = {
     message: string;
     sender: string;
     reciever: string;
+    message_id: string;
     time: Date;
+    replied_to: string | null;
 };
 
 export async function messageHandler(msg: Message, isOnline: boolean): Promise<Message|void> {
     try {
-        var { message, sender, reciever, time } = msg;
-        if (!message || !sender || !reciever) {
+        var { message, sender, reciever, time,replied_to } = msg;
+        if (!message || !sender || !reciever || message=="" || sender=="" || reciever=="") {
             console.error('Invalid message data');
             return;
         }
@@ -23,8 +25,9 @@ export async function messageHandler(msg: Message, isOnline: boolean): Promise<M
                 sender,
                 reciever,
                 time,
-                message_id: `${sender}-${reciever}-${time}`,
+                message_id: `${sender}-${reciever}-${time}-${randomUUID()}`,
                 is_sent: isOnline,
+                replied_to
             },
         });
         //console.log(M);
@@ -49,5 +52,7 @@ export async function getMessages(receiver: string): Promise<Message[]> {
         return [];
     }
 }
+
+
 
 
